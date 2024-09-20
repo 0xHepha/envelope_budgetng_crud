@@ -2,10 +2,6 @@ const express = require("express")
 const router = express.Router()
 const { getAllEnvelopes, addEnvelope, getEnvelope } = require("../db")
 
-router.get("/", (req, res, next) => {
-    res.send(getAllEnvelopes())
-})
-
 const createEnvelopeObject = (req, res, next) => {
     // Create base schame, at this point we don't know where it will be used
     let newEnvelope = {
@@ -23,6 +19,32 @@ const createEnvelopeObject = (req, res, next) => {
     req.envelope = newEnvelope
     next()
 }
+
+router.param("envelopeId", (req, res, next, id) => {
+    let validId = Number(id)
+    console.log(validId)
+    console.log(typeof validId)
+    if (isNaN(validId)) {
+        console.log("Hit")
+        return res.status(500).send("Envelope Id must be a number")
+    } else {
+        req.id = validId
+        next()
+    }
+})
+
+router.get("/", (req, res, next) => {
+    res.send(getAllEnvelopes())
+})
+
+router.get("/:envelopeId", (req, res, next) => {
+    let envelope = getEnvelope(req.id)
+    if (envelope) {
+        res.send(envelope)
+    } else {
+        res.status(404).send(`There isn't any envelope with id ${req.id}`)
+    }
+})
 
 router.post("/", createEnvelopeObject, (req, res, next) => {
     res.setHeader("content-type", "application/json")
