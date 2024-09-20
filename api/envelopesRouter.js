@@ -7,6 +7,7 @@ const {
     changeEnvelope,
     useEnvelope,
     addToEnevelope,
+    removeEnvelope,
 } = require("../db")
 
 const createEnvelopeObject = (req, res, next) => {
@@ -129,5 +130,20 @@ router.put(
     },
     updateEnvelopeBalance
 )
+
+router.delete("/:envelopeId", (req, res, next) => {
+    try {
+        let envelope = getEnvelope(req.id)
+        if (envelope) {
+            removeEnvelope(envelope)
+
+            res.status(204).send()
+        } else {
+            res.status(404).send(`There isn't any envelope with ID ${req.id}`)
+        }
+    } catch (error) {
+        res.status(error.status || 500).send(error.message)
+    }
+})
 
 module.exports = router

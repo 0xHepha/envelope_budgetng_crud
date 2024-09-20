@@ -139,6 +139,11 @@ const removeEnvelope = (envelope) => {
 
     if (index > -1) {
         data.splice(index, 1)
+    } else {
+        throw new badInput(
+            `There isn't any envelop with ID ${envelope.id}`,
+            404
+        )
     }
 }
 
