@@ -2,14 +2,16 @@ const data = [
     { id: 0, name: "Test", description: "Test dec", balance: 100 },
     { id: 1, name: "Test1", description: "", balance: 10 },
 ]
-const newId = 0
+let newId = 2
 
-/* let schemaExmaple = {
-    id: 1,
-    name: "Test",
-    description: "",
-    balance: 300,
-} */
+/*
+    let schemaExmaple = {
+        id: 1,
+        name: "Test",
+        description: "",
+        balance: 300,
+    } 
+*/
 
 const getNewId = () => {
     return newId
@@ -55,11 +57,11 @@ const getEnvelope = (selector) => {
     let envelope = false
     if (byId) {
         envelope = data.find((env) => {
-            env.id === selector
+            return env.id === selector
         })
     } else {
         envelope = data.find((env) => {
-            env.name === selector
+            return env.name === selector
         })
     }
 
@@ -71,11 +73,11 @@ const getEnvelopeIndex = (selector) => {
     let index = -1
     if (byId) {
         index = data.findIndex((env) => {
-            env.id === selector
+            return env.id === selector
         })
     } else {
         index = data.findIndex((env) => {
-            env.name === selector
+            return env.name === selector
         })
     }
 
