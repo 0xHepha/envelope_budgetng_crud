@@ -1,8 +1,8 @@
 const express = require("express")
 const router = express.Router()
+const { getAllEnvelopes } = require("../db")
 
 router.get("/", (req, res, next) => {
-    console.log("Envelope router working")
-    res.send("Working")
+    res.send(getAllEnvelopes())
 })
 module.exports = router
