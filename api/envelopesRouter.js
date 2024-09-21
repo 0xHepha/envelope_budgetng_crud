@@ -8,6 +8,7 @@ const {
     useEnvelope,
     addToEnevelope,
     removeEnvelope,
+    getEnvelopeIndex,
 } = require("../db")
 
 const createEnvelopeObject = (req, res, next) => {
@@ -29,21 +30,28 @@ const createEnvelopeObject = (req, res, next) => {
 }
 
 router.param("envelopeId", (req, res, next, id) => {
-    let validId = Number(id)
-    if (isNaN(validId)) {
+    req.id = id
+    if (!positiveNumber(req.id)) {
         return res.status(400).send("Envelope Id must be a number")
     } else {
-        req.id = validId
         next()
     }
 })
 
+const positiveNumber = (num) => {
+    let validNumber = Number(num)
+    if (isNaN(validNumber) || validNumber < 0) {
+        return false
+    }
+
+    return true
+}
+
 router.param("amount", (req, res, next, id) => {
-    let validAmount = Number(id)
-    if (isNaN(validAmount) || validAmount <= 0) {
+    req.amount = Number(id)
+    if (!positiveNumber(Number(req.amount))) {
         return res.status(400).send("Amount must be a positive number")
     } else {
-        req.amount = validAmount
         next()
     }
 })
@@ -141,6 +149,42 @@ router.delete("/:envelopeId", (req, res, next) => {
         } else {
             res.status(404).send(`There isn't any envelope with ID ${req.id}`)
         }
+    } catch (error) {
+        res.status(error.status || 500).send(error.message)
+    }
+})
+
+router.put("/transfer/:amount", (req, res, next) => {
+    const fromId = Number(req.query.from)
+    const toId = Number(req.query.to)
+    console.log(`IDS ${fromId}    ${toId}`)
+
+    if (!positiveNumber(fromId) || !positiveNumber(toId)) {
+        return res.status(400).send("ID parameter must be a positive number")
+    }
+
+    // Get indexes just to make sure they exist, will throw error if not
+    try {
+        let index1 = getEnvelopeIndex(fromId)
+        let index2 = getEnvelopeIndex(toId)
+
+        console.log(`${index1}    ${index2}`)
+        //Remove first since its the only one who trows error if balance is insuficient
+        useEnvelope(fromId, req.amount)
+        addToEnevelope(toId, req.amount)
+
+        const envelopeFrom = getEnvelope(fromId)
+        const envelopeTo = getEnvelope(toId)
+
+        console.log(envelopeFrom)
+        console.log(envelopeTo)
+
+        const newBalances = [
+            { id: fromId, balance: envelopeFrom.balance },
+            { id: toId, balance: envelopeTo.balance },
+        ]
+
+        res.status(201).send(newBalances)
     } catch (error) {
         res.status(error.status || 500).send(error.message)
     }
