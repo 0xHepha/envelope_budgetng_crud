@@ -9,6 +9,7 @@ const {
     addToEnevelope,
     removeEnvelope,
     getEnvelopeIndex,
+    addBalanceToAll,
 } = require("../db")
 
 const createEnvelopeObject = (req, res, next) => {
@@ -180,11 +181,36 @@ router.put("/transfer/:amount", (req, res, next) => {
         console.log(envelopeTo)
 
         const newBalances = [
-            { id: fromId, balance: envelopeFrom.balance },
-            { id: toId, balance: envelopeTo.balance },
+            {
+                id: fromId,
+                name: envelopeFrom.name,
+                balance: envelopeFrom.balance,
+            },
+            { id: toId, name: envelopeFrom.name, balance: envelopeTo.balance },
         ]
 
         res.status(201).send(newBalances)
+    } catch (error) {
+        res.status(error.status || 500).send(error.message)
+    }
+})
+
+router.put("/distribute/:amount", (req, res, next) => {
+    try {
+        addBalanceToAll(req.amount)
+
+        const envelopes = getAllEnvelopes()
+        let updated = []
+
+        envelopes.forEach((env) => {
+            updated.push({
+                id: env.id,
+                name: env.name,
+                balance: env.balance,
+            })
+        })
+
+        res.status(201).send(updated)
     } catch (error) {
         res.status(error.status || 500).send(error.message)
     }
